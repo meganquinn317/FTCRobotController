@@ -212,9 +212,11 @@ public  class DaisyDuckSW extends LinearOpMode {
         waitForStart();
         //int towerlevel = scanForTarget(targetsFreightFrenzy);
         //telemetry.addData("The tower level is", towerlevel);
+
+        goStraight(6,MAX_SPEED,MIN_SPEED,ACCEL);
         //attempt to turn lol w/ robot turn method
-     //   robotTurn(45, "CW");
-        //goStraight(48, MAX_SPEED, MIN_SPEED, ACCEL);
+        robotTurn(45, "CW");
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
 
         //to strafe right:
         // LF:BAck     RF: Forward   LB: Forward   RB: BAck

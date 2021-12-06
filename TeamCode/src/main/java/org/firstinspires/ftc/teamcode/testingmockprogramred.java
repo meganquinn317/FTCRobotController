@@ -21,9 +21,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.Locale;
 
-@Autonomous(name="testingpath", group="")
+@Autonomous(name="testingpathred", group="")
 
-public class testingmockprogram extends LinearOpMode {
+public class testingmockprogramred extends LinearOpMode {
 
 
     public int distance;
@@ -55,15 +55,15 @@ public class testingmockprogram extends LinearOpMode {
     static final double SCALE_ADJUST = 3.0;  // also use 4.0, 1.8?  Scaling factor used in encoderDiff calculation
 
     static final double TURN_SPEED = 0.4d;  // need to check this in robotTurn() method!! 1 is max.
-     static final double TURN_SPEED_LOW = 0.2d;
+    static final double TURN_SPEED_LOW = 0.2d;
     private Servo dumper = null;
     private DcMotor armboom = null;
     private static final float BUCKETCLEAR = .8f;
     private static final float BUCKETDUMP = 0f;
     private static final float BUCKETIN = 1f;
 
-     double tsstart = 0d;
-     double tsend = 0d;
+    double tsstart = 0d;
+    double tsend = 0d;
 
     double headingStraight;  // Hailey added 8/29/21 for Heading error correction
     double errorHeading;    // Hailey added 8/29/21 for Heading error correction
@@ -115,7 +115,7 @@ public class testingmockprogram extends LinearOpMode {
         LB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      armboom.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+     armboom.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         armboom.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -168,12 +168,12 @@ public class testingmockprogram extends LinearOpMode {
 
         sleep(500);
 
-       // robotTurn(45, "CW");
-        strafeBuddy(-18);
+        // robotTurn(45, "CW");
+        strafeBuddy(18);
         telemetry.addData("HEading", getHeading(AngleUnit.DEGREES));
         telemetry.update();
         sleep(1000);
-       // armboom.setTargetPosition(50);
+        // armboom.setTargetPosition(50);
         /*arm stuff
         dumper.setPosition(BUCKETCLEAR);
         sleep(1000);
@@ -191,25 +191,26 @@ public class testingmockprogram extends LinearOpMode {
         sleep(500);
 
         //turn 45 degrees
-       strafeBuddy(-65);
-        telemetry.addData("HEading", getHeading(AngleUnit.DEGREES));
-        telemetry.update();
-        //turnTo(-90);
+        robotTurn(75,"CW");
         sleep(1000);
-        goStraight(26, MAX_SPEED,MIN_SPEED,ACCEL);
+
+        goStraight(49.5,MAX_SPEED,MIN_SPEED,ACCEL);
         sleep(500);
-        spinspinducky.setPower(1);
+
+       // strafeBuddy(20);
+
+        spinspinducky.setPower(-1);
 
         sleep(10000);
         spinspinducky.setPower(0);
+        goStraight(-6,MAX_SPEED,MIN_SPEED,ACCEL);
+        sleep(500);
+        robotTurn(15,"CW");
+        sleep(500);
+        goStraight(-110,1, .8, ACCEL);
 
-        goStraight(-17,MAX_SPEED, MIN_SPEED, ACCEL);
 
-        robotTurn(20, "CW");
 
-        strafeBuddy(-2);
-
-        strafeBuddy(1);
 
        /* telemetry.addData("Heading: ",getHeading(AngleUnit.DEGREES));
         telemetry.addData("Started: ",tsstart);
@@ -313,6 +314,9 @@ public class testingmockprogram extends LinearOpMode {
     public void strafeBuddy(float distanceMoveInches) {
 
         distanceMoveInches*=18;
+        float desiredposL = LB.getCurrentPosition()-distanceMoveInches;
+
+        float desiredposR = RB.getCurrentPosition()-distanceMoveInches;
 
         telemetry.addData("Lb pos", LB.getCurrentPosition());
         telemetry.update();
@@ -360,7 +364,59 @@ public class testingmockprogram extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     }
+    public void strafeTesty(float distanceMoveInches) {
 
+        distanceMoveInches*=18;
+        float desiredposL = LB.getCurrentPosition()-distanceMoveInches;
+
+        float desiredposR = RB.getCurrentPosition()-distanceMoveInches;
+
+        telemetry.addData("Lb pos", LB.getCurrentPosition());
+        telemetry.update();
+        if (distanceMoveInches > 0) {
+            while (LB.getCurrentPosition() < (distanceMoveInches) && RB.getCurrentPosition() < (distanceMoveInches) && opModeIsActive()) {
+                LF.setPower(MAX_SPEED);
+                RF.setPower(-MAX_SPEED);
+                RB.setPower(MAX_SPEED);
+                LB.setPower(-MAX_SPEED);
+            }
+        } else {
+            distanceMoveInches = 0-distanceMoveInches;
+            while (LB.getCurrentPosition() < (distanceMoveInches) && RB.getCurrentPosition() < (distanceMoveInches) && opModeIsActive()) {
+                LF.setPower(-MAX_SPEED);
+                RF.setPower(MAX_SPEED);
+                RB.setPower(-MAX_SPEED);
+                LB.setPower(MAX_SPEED);
+            }
+        }
+
+
+        LF.setPower(0);
+        RF.setPower(0);
+        RB.setPower(0);
+        LB.setPower(0);
+
+        telemetry.addData("LB Current Position (before move): ", LB.getCurrentPosition());
+        telemetry.addData("RB Current Position (before move): ", RB.getCurrentPosition());
+        telemetry.update();  // MKING - look at Left and Right Back wheel encoder position before move
+        sleep(500); // MKING - sleep for 3 secs to allow time to see telemetry
+
+        LF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+    }
     //  MKing - Method to move straight, from 1st year Nerdettes FTC team
     //  MKIng - Adapted to mecanum 4-wheel drive instead of regular 4-wheel drive
     //  MKing - Includes accelerate/decelerate and error correction for encoder difference
@@ -583,7 +639,7 @@ public class testingmockprogram extends LinearOpMode {
                 if (newHeading < -180)
                     newHeading = 360 + newHeading;  // use '+' since newHeading is a negative number
 
-          //      while (getHeading(AngleUnit.DEGREES) >= newHeading) {
+                //      while (getHeading(AngleUnit.DEGREES) >= newHeading) {
                 while (Math.abs(getHeading(AngleUnit.DEGREES) - newHeading) >= 5d){
                     if (Math.abs(getHeading(AngleUnit.DEGREES) - newHeading) >= 15d) {
                         LF.setPower(TURN_SPEED);
