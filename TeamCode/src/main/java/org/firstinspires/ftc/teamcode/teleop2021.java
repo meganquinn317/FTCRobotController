@@ -116,42 +116,29 @@ public class teleop2021 extends OpMode {
         }
 
         //Move so bucket doesnt hit chasis
-        if (gamepad1.b) {
+        if (gamepad2.y) {
             // dumper.setPosition(.8);
             dumper.setPosition(BUCKETCLEAR);
         }
         //Dump
-        if (gamepad1.y) {
+        if (gamepad2.x) {
             //dumper.setPosition(0);
             dumper.setPosition(BUCKETDUMP);
         }
         //Rest
-        if (gamepad1.a) {
+        if (gamepad2.a) {
             //dumper.setPosition(1);
             dumper.setPosition(BUCKETIN);
         }
         //boom up
-        if (gamepad1.left_trigger >= .1)
+        if (gamepad2.left_trigger >= .1)
         {
-            /*if (!gamepad1.y)
-            {
-                dumper.setPosition(BUCKETCLEAR);
-            }**/
-            //changed to try and fix hold dump button down -Megan 11/20/21
-            armboom.setPower(gamepad1.left_trigger);
-            telemetry.addData(String.valueOf(armboom.getCurrentPosition()), "Position");
-            telemetry.update();
-        } else if (gamepad1.right_trigger >= .1) {//boom down
-            if (!gamepad1.y) {
-                dumper.setPosition(BUCKETCLEAR);
-            }
-        armboom.setPower(-gamepad1.right_trigger);
-            telemetry.addData(String.valueOf(armboom.getCurrentPosition()), "Position");
-            telemetry.update();
-
+            armboom.setPower(gamepad2.left_trigger);
+        } else if (gamepad2.right_trigger >= .1) {
+            armboom.setPower(-gamepad2.right_trigger);
         } else {
             armboom.setPower(0);
-            armboom.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            armboom.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
         if (gamepad2.left_bumper){
@@ -164,17 +151,6 @@ public class teleop2021 extends OpMode {
             spinspinducky.setPower(0);
         }
 
-
-  //      double positionTarget = turny.getPosition();
-        // This code is to drive the up/down winch servo for the turny
-    /*    if (gamepad2.dpad_right && positionTarget <= 1) { // 1 = max winch turns (approx 8)
-            positionTarget += 0.001;
-            turny.setPosition(positionTarget);  // move/hold winch servo to commanded position
-        }
-        if (gamepad2.dpad_left && positionTarget >= 0.34) {// 0 = minimum value
-            positionTarget -= 0.001;
-            turny.setPosition(positionTarget);  // move/hold winch servo to commanded position
-        }*/
         double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y) * PowerFactor;
         double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
         double rightX = Math.pow(gamepad1.right_stick_x,5.0);

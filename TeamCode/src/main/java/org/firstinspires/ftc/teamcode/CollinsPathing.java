@@ -64,6 +64,7 @@ public class CollinsPathing extends LinearOpMode {
     BNO055IMU imu;
     Orientation angles;
     Acceleration gravity;
+    private float allowableHeadingDeviation = 2.0f;
 
     //Code to run ONCE when the driver hits INIT
 
@@ -135,30 +136,44 @@ public class CollinsPathing extends LinearOpMode {
         // Define the path here!!!!
 
         // go straight away from wall
-        goStraight(-6, MAX_SPEED, MIN_SPEED, ACCEL);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnCW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnCW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnCW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnCW(90);
 
-        sleep(500);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnACW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnACW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnACW(90);
+        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
+        turnACW(90);
 
         // robotTurn(45, "CW");
 
         //turn 45 degrees
-        robotTurn(75,"CW");
-        sleep(1000);
+        //robotTurn(75,"CW");
+        //sleep(1000);
 
-        goStraight(17.8,MAX_SPEED,MIN_SPEED,ACCEL);
-        sleep(500);
+        //goStraight(17.8,MAX_SPEED,MIN_SPEED,ACCEL);
+        //sleep(500);
 
         // strafeBuddy(20);
 
-        spinspinducky.setPower(-1);
+        //spinspinducky.setPower(-1);
 
-        sleep(10000);
-        spinspinducky.setPower(0);
-        goStraight(-6,MAX_SPEED,MIN_SPEED,ACCEL);
-        sleep(500);
-        robotTurn(15,"CW");
-        sleep(500);
-        goStraight(-110,1, .8, ACCEL);
+        //sleep(10000);
+        //spinspinducky.setPower(0);
+        //goStraight(-6,MAX_SPEED,MIN_SPEED,ACCEL);
+        //sleep(500);
+        //robotTurn(15,"CW");
+        //sleep(500);
+        //goStraight(-110,1, .8, ACCEL);
 
         // End of the actual path
         // -------------------------
@@ -447,6 +462,97 @@ public class CollinsPathing extends LinearOpMode {
 
             }
         }
+    }
+
+    private void turnCW(float turnDegrees) {
+        desiredHeading -= turnDegrees;
+        if (desiredHeading < -180) {
+            desiredHeading += 360;
+        }
+        turnToHeading();
+    }
+
+    private void turnACW(float turnDegrees) {
+        desiredHeading += turnDegrees;
+        if (desiredHeading > 180) {
+            desiredHeading -= 360;
+        }
+        turnToHeading();
+    }
+
+    private void turnToHeading() {
+        float actualHeading = (float) getHeading(AngleUnit.DEGREES);
+        float turnSpeed = 0.2f;
+        boolean isACW = false;
+
+        // If we have called the function but are already on that heading
+        // (within acceptableDeviation), just return.
+        if (Math.abs(desiredHeading - actualHeading)%180 < allowableHeadingDeviation) {
+            return;
+        }
+
+        // Inverting speed in the case of an AntiClockwise movement.
+        if ((desiredHeading - actualHeading) > 0 || (desiredHeading - actualHeading) < -180) {
+            turnSpeed *= -1f;
+            isACW = true;
+        }
+
+        if (isACW) {
+            while ((desiredHeading - actualHeading)%180 > allowableHeadingDeviation) {
+                LF.setPower(turnSpeed);
+                LB.setPower(turnSpeed);
+                RF.setPower(-turnSpeed);
+                RB.setPower(-turnSpeed);
+                actualHeading = (float) getHeading(AngleUnit.DEGREES);
+                if ((desiredHeading - actualHeading)%180 < -allowableHeadingDeviation) {
+                    telemetry.addData("Turn: ", "We overshot.");
+                }
+            }
+        } else {
+            while ((desiredHeading - actualHeading)%180 < -allowableHeadingDeviation) {
+                LF.setPower(turnSpeed);
+                LB.setPower(turnSpeed);
+                RF.setPower(-turnSpeed);
+                RB.setPower(-turnSpeed);
+                actualHeading = (float) getHeading(AngleUnit.DEGREES);
+                if ((desiredHeading - actualHeading)%180 > allowableHeadingDeviation) {
+                    telemetry.addData("Turn: ", "We overshot.");
+                }
+            }
+        }
+
+        telemetry.addData("DH: ", desiredHeading);
+        telemetry.addData("AH: ", actualHeading);
+        telemetry.update();
+
+        resetEncoders();
+    }
+
+    private void resetEncoders() {
+        LF.setPower(0);
+        RF.setPower(0);
+        LB.setPower(0);
+        RB.setPower(0);
+
+        LF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RB.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Just a little time to make sure encoders have reset
+        sleep(200);
+
+        // Only using the LB Encoder
+        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Not technically encoder but...
+        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 }
 
