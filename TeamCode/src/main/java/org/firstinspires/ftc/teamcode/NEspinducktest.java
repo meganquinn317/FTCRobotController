@@ -170,7 +170,7 @@ import java.util.Locale;
             // robotTurn(45, "CW");
 
             //turn 45 degrees
-            robotTurn(75,"CW");
+            robotTurn(-75,"CW");
             sleep(1000);
 
             goStraight(17.8,MAX_SPEED,MIN_SPEED,ACCEL);

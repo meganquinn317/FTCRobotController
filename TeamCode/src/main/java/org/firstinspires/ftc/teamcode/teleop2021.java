@@ -23,7 +23,7 @@ public class teleop2021 extends OpMode {
     private DcMotor intake = null;
     private DcMotor armboom = null;
     //private  DcMotor intakemotor = null;
-    private double PowerFactor = 0.8;
+    private double PowerFactor = 0.65;
     private Servo dumper = null;
     //private Servo tester = null;
     double tgtPower = 0;

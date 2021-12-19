@@ -25,7 +25,7 @@ public class CollinsPathing extends LinearOpMode {
 
 
     public int distance;
-    public double desiredHeading;  // IMU measurement of current Heading
+    public float desiredHeading;  // IMU measurement of current Heading
 
     public org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit DistanceUnit;
     private ElapsedTime runtime = new ElapsedTime();
@@ -47,7 +47,7 @@ public class CollinsPathing extends LinearOpMode {
     static final double SCALE_ADJUST = 3.0;  // also use 4.0, 1.8?  Scaling factor used in encoderDiff calculation
 
     static final float STRAFE_MOD = 18f; // Changes desired distance to encoder ticks.
-    static final double TURN_SPEED = 0.4d;  // need to check this in robotTurn() method!! 1 is max.
+    static final float TURN_SPEED = 0.4f;  // need to check this in robotTurn() method!! 1 is max.
     static final double TURN_SPEED_LOW = 0.2d;
     private Servo dumper = null;
     private DcMotor armboom = null;
@@ -111,6 +111,7 @@ public class CollinsPathing extends LinearOpMode {
         LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+
         // IMU initialization
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -126,6 +127,8 @@ public class CollinsPathing extends LinearOpMode {
         // Set up our telemetry dashboard
         composeTelemetry();  // need to add this method at end of code
 
+        desiredHeading = (float) getHeading(AngleUnit.DEGREES);
+
         dumper.setPosition(BUCKETIN);
         telemetry.addData("Status", "Initialized");
 
@@ -135,7 +138,7 @@ public class CollinsPathing extends LinearOpMode {
         // -------------------------
         // Define the path here!!!!
 
-        // go straight away from wall
+
         goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
         turnCW(90);
         goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
@@ -144,36 +147,6 @@ public class CollinsPathing extends LinearOpMode {
         turnCW(90);
         goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
         turnCW(90);
-
-        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
-        turnACW(90);
-        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
-        turnACW(90);
-        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
-        turnACW(90);
-        goStraight(24, MAX_SPEED, MIN_SPEED, ACCEL);
-        turnACW(90);
-
-        // robotTurn(45, "CW");
-
-        //turn 45 degrees
-        //robotTurn(75,"CW");
-        //sleep(1000);
-
-        //goStraight(17.8,MAX_SPEED,MIN_SPEED,ACCEL);
-        //sleep(500);
-
-        // strafeBuddy(20);
-
-        //spinspinducky.setPower(-1);
-
-        //sleep(10000);
-        //spinspinducky.setPower(0);
-        //goStraight(-6,MAX_SPEED,MIN_SPEED,ACCEL);
-        //sleep(500);
-        //robotTurn(15,"CW");
-        //sleep(500);
-        //goStraight(-110,1, .8, ACCEL);
 
         // End of the actual path
         // -------------------------
@@ -226,6 +199,8 @@ public class CollinsPathing extends LinearOpMode {
         RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        turnToHeading(TURN_SPEED);
 
     }
 
@@ -328,6 +303,7 @@ public class CollinsPathing extends LinearOpMode {
         }
         encoderBrake(200);
         headingStraight = getHeading(AngleUnit.DEGREES);
+
     }
 
     public void encoderBrake(int pause) {  // Stop motors and sleep for 'pause' milliseconds
@@ -469,7 +445,7 @@ public class CollinsPathing extends LinearOpMode {
         if (desiredHeading < -180) {
             desiredHeading += 360;
         }
-        turnToHeading();
+        turnToHeading(TURN_SPEED);
     }
 
     private void turnACW(float turnDegrees) {
@@ -477,10 +453,10 @@ public class CollinsPathing extends LinearOpMode {
         if (desiredHeading > 180) {
             desiredHeading -= 360;
         }
-        turnToHeading();
+        turnToHeading(TURN_SPEED);
     }
 
-    private void turnToHeading() {
+    private void turnToHeading(float speed) {
         float actualHeading = (float) getHeading(AngleUnit.DEGREES);
         float turnSpeed = 0.2f;
         boolean isACW = false;
@@ -493,30 +469,33 @@ public class CollinsPathing extends LinearOpMode {
 
         // Inverting speed in the case of an AntiClockwise movement.
         if ((desiredHeading - actualHeading) > 0 || (desiredHeading - actualHeading) < -180) {
-            turnSpeed *= -1f;
+            speed *= -1f;
             isACW = true;
         }
 
         if (isACW) {
+            LF.setPower(speed);
+            LB.setPower(speed);
+            RF.setPower(-speed);
+            RB.setPower(-speed);
             while ((desiredHeading - actualHeading)%180 > allowableHeadingDeviation) {
-                LF.setPower(turnSpeed);
-                LB.setPower(turnSpeed);
-                RF.setPower(-turnSpeed);
-                RB.setPower(-turnSpeed);
                 actualHeading = (float) getHeading(AngleUnit.DEGREES);
                 if ((desiredHeading - actualHeading)%180 < -allowableHeadingDeviation) {
                     telemetry.addData("Turn: ", "We overshot.");
+                    turnToHeading(speed/2f);
                 }
             }
         } else {
+            LF.setPower(speed);
+            LB.setPower(speed);
+            RF.setPower(-speed);
+            RB.setPower(-speed);
             while ((desiredHeading - actualHeading)%180 < -allowableHeadingDeviation) {
-                LF.setPower(turnSpeed);
-                LB.setPower(turnSpeed);
-                RF.setPower(-turnSpeed);
-                RB.setPower(-turnSpeed);
+
                 actualHeading = (float) getHeading(AngleUnit.DEGREES);
                 if ((desiredHeading - actualHeading)%180 > allowableHeadingDeviation) {
                     telemetry.addData("Turn: ", "We overshot.");
+                    turnToHeading(speed/2f);
                 }
             }
         }
